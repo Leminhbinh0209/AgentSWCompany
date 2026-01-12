@@ -666,6 +666,189 @@ START
 
 ---
 
+## 🤖 LLM Setup and Configuration
+
+The framework supports multiple LLM backends for running agents. Currently, the framework prioritizes **LocalLLM (llama.cpp)** and **VLLM** for local inference. The `get_llm()` function automatically selects the best available option.
+
+### Supported LLM Backends
+
+#### 1. LocalLLM (llama.cpp) - **Recommended for CPU/GPU**
+
+**Pros:**
+- ✅ Works on both CPU and GPU
+- ✅ No server setup required
+- ✅ Low memory footprint
+- ✅ Supports multiple model formats (GGUF)
+- ✅ Supports Llama 2, Llama 3, Qwen 2/2.5, IBM Granite 3.0
+- ✅ Fast inference on CPU with quantization
+- ✅ Easy to use - just point to model file
+
+**Cons:**
+- ❌ Slower than vLLM for batch inference
+- ❌ Limited to single model per instance
+- ❌ Requires downloading model files (several GB)
+
+**Installation:**
+
+```bash
+# Install llama-cpp-python
+pip install llama-cpp-python
+
+# For GPU support (CUDA), use:
+CMAKE_ARGS="-DLLAMA_CUBLAS=on" pip install llama-cpp-python --force-reinstall --no-cache-dir
+
+# For CPU-only (faster on some systems):
+CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS" pip install llama-cpp-python --force-reinstall --no-cache-dir
+```
+
+**Download Models:**
+
+1. **Llama 3 8B Instruct (Recommended):**
+   ```bash
+   # Download from Hugging Face
+   # Visit: https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct-GGUF
+   # Or use huggingface-cli:
+   huggingface-cli download meta-llama/Meta-Llama-3-8B-Instruct-GGUF Meta-Llama-3-8B-Instruct.Q3_K_M.gguf --local-dir ./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF
+   ```
+
+2. **Other Supported Models:**
+   - Llama 2: `meta-llama/Llama-2-7b-chat-hf`
+   - Qwen 2.5: `Qwen/Qwen2.5-7B-Instruct-GGUF`
+   - IBM Granite: `ibm-granite/granite-3b-instruct-v2`
+
+**Usage:**
+
+The framework automatically detects and uses LocalLLM if a model file is found at the default path:
+```python
+from framework.llm import get_llm
+
+# Automatically uses LocalLLM if model file exists
+llm = get_llm(
+    local_model_path="./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf"
+)
+```
+
+**Model Path Configuration:**
+
+Update the default path in `framework/llm.py` or pass it to `get_llm()`:
+```python
+llm = get_llm(
+    local_model_path="/path/to/your/model.gguf"
+)
+```
+
+---
+
+#### 2. VLLM - **Recommended for GPU with High Throughput**
+
+**Pros:**
+- ✅ Very fast inference (optimized for GPU)
+- ✅ Excellent for batch processing
+- ✅ Supports continuous batching
+- ✅ Can serve multiple models
+- ✅ OpenAI-compatible API
+- ✅ Better for production deployments
+
+**Cons:**
+- ❌ **Requires GPU** (NVIDIA GPU with CUDA)
+- ❌ Higher memory usage
+- ❌ Requires separate server process
+- ❌ More complex setup
+- ❌ Not suitable for CPU-only systems
+
+**Prerequisites:**
+- NVIDIA GPU with CUDA support
+- CUDA 11.8 or later
+- Python 3.8+
+
+**Installation:**
+
+```bash
+# Install vLLM (requires GPU)
+pip install vllm
+
+# Or install with specific CUDA version
+pip install vllm --extra-index-url https://download.pytorch.org/whl/cu118
+```
+
+**Starting vLLM Server:**
+
+```bash
+# Start vLLM server with a model
+python -m vllm.entrypoints.openai.api_server \
+    --model codellama/CodeLlama-7b-Instruct-hf \
+    --port 8000 \
+    --tensor-parallel-size 1 \
+    --gpu-memory-utilization 0.8 \
+
+# Or with custom settings:
+python -m vllm.entrypoints.openai.api_server \
+    --model /path/to/model \
+    --port 8000 \
+    --host 0.0.0.0 \
+    --tensor-parallel-size 1 \
+    --gpu-memory-utilization 0.5 \
+```
+
+**Usage:**
+
+The framework automatically detects and uses VLLM if the server is running:
+```python
+from framework.llm import get_llm
+
+# Automatically uses VLLM if server is running on localhost:8000
+llm = get_llm(
+    vllm_base_url="http://localhost:8000/v1",
+    vllm_model="meta-llama/Meta-Llama-3-8B-Instruct"  # Optional
+)
+```
+
+**Verify Server is Running:**
+
+```bash
+# Test the server
+curl http://localhost:8000/v1/models
+```
+
+---
+
+
+### Quick Start Recommendations
+
+**For CPU-only systems:**
+- Use **LocalLLM** with quantized models (Q3_K_M, Q4_K_M)
+- Download GGUF format models for best performance
+- Recommended: Llama 3 8B Instruct Q3_K_M (~5GB)
+
+**For GPU systems:**
+- **Option 1**: Use **LocalLLM** for simplicity (works great on GPU too!)
+- **Option 2**: Use **VLLM** for maximum throughput and batch processing
+- Recommended: CodeLlama-7b-Instruct-hf
+
+**For Production:**
+- Use **VLLM** with proper server setup
+- Configure proper resource limits
+- Use load balancing for multiple instances
+
+### Troubleshooting
+
+**LocalLLM Issues:**
+- **Model not found**: Check the model path in `get_llm()` or `framework/llm.py`
+- **Out of memory**: Use a smaller quantized model (Q2_K, Q3_K_M)
+- **Slow inference**: Enable GPU support or use a smaller model
+
+**VLLM Issues:**
+- **Server not starting**: Check GPU availability with `nvidia-smi`
+- **Connection refused**: Verify server is running on correct port
+- **Out of memory**: Reduce `--max-model-len`, `--gpu-memory-utilization` or use tensor parallelism
+
+**General:**
+- Check logs for detailed error messages
+- Verify model format compatibility
+- Ensure sufficient disk space for model files
+
+---
+
 ## 📊 Progress Tracking
 
 Track your progress through the course:

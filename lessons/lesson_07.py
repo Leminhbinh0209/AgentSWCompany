@@ -17,7 +17,7 @@ from framework.actions.write_prd import WritePRD
 from framework.actions.write_design import WriteDesign
 from framework.actions.write_code import WriteCode
 from framework.schema import Message
-from framework.llm import MockLLM
+from framework.llm import get_llm
 
 
 async def main():
@@ -26,8 +26,12 @@ async def main():
     print("=" * 60)
     print()
     
-    llm = MockLLM()
-    
+    llm = get_llm(
+        local_model_path="EMPTY", #"./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
+        vllm_base_url="http://localhost:8000/v1",
+        vllm_model="codellama/CodeLlama-7b-Instruct-hf"
+    )
+    # import code; code.interact(local=dict(globals(), **locals()))
     # 1. WritePRD Action
     print("1. WritePRD Action")
     print("-" * 60)
@@ -37,7 +41,7 @@ async def main():
     
     prd_result = await write_prd.run(messages=messages)
     print(f"Requirement: {requirement}")
-    print(f"PRD Preview: {prd_result.content[:200]}...")
+    print(f"PRD Preview: {prd_result.content[:]}...")
     print()
     
     # 2. WriteDesign Action
@@ -47,7 +51,7 @@ async def main():
     prd_message = Message(content=prd_result.content, role="ProductManager", cause_by="WritePRD")
     
     design_result = await write_design.run(messages=[prd_message])
-    print(f"Design Preview: {design_result.content[:200]}...")
+    print(f"Design Preview: {design_result.content[:]}...")
     print()
     
     # 3. WriteCode Action
@@ -57,7 +61,7 @@ async def main():
     design_message = Message(content=design_result.content, role="Architect", cause_by="WriteDesign")
     
     code_result = await write_code.run(messages=[design_message])
-    print(f"Code Preview: {code_result.content[:200]}...")
+    print(f"Code Preview: {code_result.content[:]}...")
     print()
     
     # 4. Complete Workflow

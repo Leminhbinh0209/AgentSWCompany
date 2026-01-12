@@ -14,7 +14,7 @@ import asyncio
 
 # Add parent directory to path to import framework
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_example'))
-from framework.llm import MockLLM, OpenAILLM, VLLM, LocalLLM, BaseLLM
+from framework.llm import MockLLM, OpenAILLM, VLLM, LocalLLM, BaseLLM, get_llm
 
 
 async def main():
@@ -135,8 +135,30 @@ async def main():
     print("    4. LocalLLM - for llama.cpp")
     print()
     
-    # 8. Using LLM in actions
-    print("8. Using LLM in Actions")
+    # 8. Using get_llm() (Recommended)
+    print("8. Using get_llm() (Recommended Approach)")
+    print("-" * 60)
+    print("get_llm() automatically selects the best available LLM:")
+    print("  1. LocalLLM (if model file exists)")
+    print("  2. VLLM (if server is running)")
+    print("  3. MockLLM (fallback)")
+    print()
+    try:
+        recommended_llm = get_llm(
+        local_model_path="EMPTY", #"./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
+        vllm_base_url="http://localhost:8000/v1",
+        vllm_model="codellama/CodeLlama-7b-Instruct-hf"
+    )
+        llm_type = type(recommended_llm).__name__
+        print(f"✓ Selected LLM: {llm_type}")
+        test_response = await recommended_llm.aask("Hello")
+        print(f"  Test response: {test_response[:80]}...")
+    except Exception as e:
+        print(f"  Error: {e}")
+    print()
+    
+    # 9. Using LLM in actions
+    print("9. Using LLM in Actions")
     print("-" * 60)
     from framework.action import Action
     from framework.schema import ActionOutput
@@ -159,6 +181,8 @@ async def main():
     print()
     print("Key Takeaways:")
     print("- LLMs provide AI capabilities to actions")
+    print("- Use get_llm() for automatic LLM selection (recommended)")
+    print("  Priority: LocalLLM → VLLM → MockLLM")
     print("- MockLLM is for testing without API keys")
     print("- OpenAILLM connects to OpenAI API")
     print("- VLLM connects to vLLM server on localhost")

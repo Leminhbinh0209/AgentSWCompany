@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_examp
 from framework.actions.advanced.action_graph import ActionGraph, ActionNode
 from framework.action import Action
 from framework.schema import Message, ActionOutput
-from framework.llm import MockLLM
+from framework.llm import get_llm
 from typing import List, Optional
 
 
@@ -40,8 +40,8 @@ async def main():
     print("-" * 60)
     graph = ActionGraph()
     
-    action1 = SimpleAction("Action1", "Result 1", llm=MockLLM())
-    action2 = SimpleAction("Action2", "Result 2", llm=MockLLM())
+    action1 = SimpleAction("Action1", "Result 1", llm=get_llm())
+    action2 = SimpleAction("Action2", "Result 2", llm=get_llm())
     
     node1 = ActionNode(action1, node_id="node1")
     node2 = ActionNode(action2, node_id="node2")

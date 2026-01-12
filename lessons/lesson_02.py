@@ -16,7 +16,7 @@ import asyncio
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_example'))
 from framework.action import Action
 from framework.schema import Message, ActionOutput
-from framework.llm import MockLLM
+from framework.llm import get_llm
 from typing import List
 
 

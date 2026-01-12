@@ -17,7 +17,7 @@ import shutil
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_example'))
 from framework.repository.project_repo import ProjectRepo
 from framework.repository.code_generator import CodeGenerator
-from framework.llm import MockLLM
+from framework.llm import get_llm
 
 
 async def main():
@@ -32,7 +32,11 @@ async def main():
     
     try:
         repo = ProjectRepo(workspace)
-        llm = MockLLM()
+        llm = get_llm(
+        local_model_path="EMPTY", #"./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
+        vllm_base_url="http://localhost:8000/v1",
+        vllm_model="codellama/CodeLlama-7b-Instruct-hf"
+    )
         generator = CodeGenerator(repo, llm=llm)
         
         # 1. Generate project

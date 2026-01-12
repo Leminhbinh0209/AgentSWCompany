@@ -14,7 +14,7 @@ import asyncio
 # Add parent directory to path to import framework
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_example'))
 from framework.roles.qa_engineer import QAEngineer
-from framework.llm import MockLLM
+from framework.llm import get_llm
 
 
 async def main():
@@ -23,7 +23,11 @@ async def main():
     print("=" * 60)
     print()
     
-    llm = MockLLM()
+    llm = get_llm(
+        local_model_path="EMPTY", #"./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
+        vllm_base_url="http://localhost:8000/v1",
+        vllm_model="codellama/CodeLlama-7b-Instruct-hf"
+    )
     qa = QAEngineer(llm=llm)
     
     print("1. QA Engineer Role")

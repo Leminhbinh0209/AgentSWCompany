@@ -18,7 +18,7 @@ from framework.team import Team
 from framework.roles.product_manager import ProductManager
 from framework.roles.architect import Architect
 from framework.roles.engineer import Engineer
-from framework.llm import MockLLM
+from framework.llm import get_llm
 
 
 async def main():
@@ -30,7 +30,11 @@ async def main():
     # 1. Initialize team
     print("1. Initializing Team")
     print("-" * 60)
-    llm = MockLLM()
+    llm = get_llm(
+        local_model_path="EMPTY", #"./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
+        vllm_base_url="http://localhost:8000/v1",
+        vllm_model="codellama/CodeLlama-7b-Instruct-hf"
+    )
     team = Team()
     
     team.hire([

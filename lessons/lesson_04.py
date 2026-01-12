@@ -18,7 +18,7 @@ from framework.environment import Environment
 from framework.role import Role
 from framework.action import Action
 from framework.schema import Message, ActionOutput
-from framework.llm import MockLLM
+from framework.llm import get_llm
 from typing import List
 
 
@@ -47,7 +47,11 @@ async def main():
     # 2. Add roles to environment
     print("2. Adding Roles to Environment")
     print("-" * 60)
-    llm = MockLLM()
+    llm = get_llm(
+        local_model_path="EMPTY", #"./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
+        vllm_base_url="http://localhost:8000/v1",
+        vllm_model="codellama/CodeLlama-7b-Instruct-hf"
+    )
     
     role1 = Role(
         name="Agent1",

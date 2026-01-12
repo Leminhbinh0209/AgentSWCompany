@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_examp
 from framework.planning.planner import Planner
 from framework.planning.task import Task, TaskStatus
 from framework.planning.plan import Plan
-from framework.llm import MockLLM
+from framework.llm import get_llm
 
 
 async def main():
@@ -25,7 +25,7 @@ async def main():
     print("=" * 60)
     print()
     
-    planner = Planner(llm=MockLLM())
+    planner = Planner(llm=get_llm())
     
     # Create a plan
     print("1. Creating a Plan")

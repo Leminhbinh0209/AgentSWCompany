@@ -16,7 +16,7 @@ import shutil
 # Add parent directory to path to import framework
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_example'))
 from framework.quality.test_generator import TestGenerator
-from framework.llm import MockLLM
+from framework.llm import get_llm
 
 
 async def main():
@@ -37,7 +37,7 @@ def multiply(a, b):
     return a * b
 """
         
-        generator = TestGenerator(workspace_path=workspace, llm=MockLLM())
+        generator = TestGenerator(workspace_path=workspace, llm=get_llm())
         
         # Generate tests
         print("1. Generating Tests")

@@ -2,6 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional
 import asyncio
+import aiohttp
 
 
 class BaseLLM(ABC):
@@ -185,4 +186,163 @@ class OpenAILLM(BaseLLM):
         )
         
         return response.choices[0].message.content
+
+
+class VLLM(BaseLLM):
+    """vLLM server implementation for localhost inference"""
+    
+    def __init__(
+        self,
+        base_url: str = "http://localhost:8000/v1",
+        model: str = None,
+        temperature: float = 0.2,
+        max_tokens: int = 512,
+        api_key: str = None
+    ):
+        """
+        Initialize the vLLM client.
+        
+        Args:
+            base_url: Base URL of the vLLM server (default: http://localhost:8000/v1)
+            model: Model name (optional, server may have a default)
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens to generate
+            api_key: Optional API key for authentication
+        """
+        self.base_url = base_url.rstrip('/')
+        self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.api_key = api_key
+        
+        # Ensure the URL has /v1 prefix for OpenAI-compatible API
+        if not self.base_url.endswith('/v1'):
+            if self.base_url.endswith('/v1/'):
+                self.base_url = self.base_url.rstrip('/')
+            else:
+                self.base_url = f"{self.base_url}/v1"
+    
+    async def aask(self, prompt: str, system_msgs: Optional[List[str]] = None) -> str:
+        """
+        Generate text from a prompt using vLLM server.
+        
+        Args:
+            prompt: The input text prompt
+            system_msgs: Optional list of system messages
+            
+        Returns:
+            Generated text as a string
+        """
+        messages = []
+        
+        if system_msgs:
+            for sys_msg in system_msgs:
+                messages.append({"role": "system", "content": sys_msg})
+        
+        messages.append({"role": "user", "content": prompt})
+        
+        payload = {
+            "messages": messages,
+            "temperature": self.temperature,
+            "max_tokens": self.max_tokens,
+        }
+        
+        if self.model:
+            payload["model"] = self.model
+        
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    f"{self.base_url}/chat/completions",
+                    json=payload,
+                    headers=headers,
+                    timeout=aiohttp.ClientTimeout(total=300)
+                ) as response:
+                    if response.status != 200:
+                        error_text = await response.text()
+                        raise RuntimeError(
+                            f"vLLM server error (status {response.status}): {error_text}"
+                        )
+                    
+                    result = await response.json()
+                    return result["choices"][0]["message"]["content"]
+        except aiohttp.ClientError as e:
+            raise RuntimeError(
+                f"Failed to connect to vLLM server at {self.base_url}. "
+                f"Make sure the server is running. Error: {e}"
+            )
+
+
+class LocalLLM(BaseLLM):
+    """
+    A minimal wrapper for local LLM inference using llama.cpp.
+    
+    This class is intentionally simple and grows throughout the lessons.
+    """
+    
+    def __init__(
+        self,
+        model_path: str,
+        temperature: float = 0.2,
+        max_tokens: int = 512,
+        n_ctx: int = 2048
+    ):
+        """
+        Initialize the local LLM.
+        
+        Args:
+            model_path: Path to the GGUF model file
+            temperature: Sampling temperature (0.0 = deterministic, 1.0 = creative)
+            max_tokens: Maximum tokens to generate per response
+            n_ctx: Context window size
+        """
+        try:
+            from llama_cpp import Llama
+        except ImportError:
+            raise ImportError(
+                "llama-cpp-python package is required. Install with: "
+                "pip install llama-cpp-python"
+            )
+        
+        self.llm = Llama(
+            model_path=model_path,
+            temperature=temperature,
+            n_ctx=n_ctx,
+            verbose=False,
+        )
+        self.max_tokens = max_tokens
+    
+    async def aask(self, prompt: str, system_msgs: Optional[List[str]] = None) -> str:
+        """
+        Generate text from a prompt.
+        
+        Args:
+            prompt: The input text prompt
+            system_msgs: Optional list of system messages (will be prepended to prompt)
+            
+        Returns:
+            Generated text as a string
+        """
+        # Combine system messages and user prompt
+        full_prompt = prompt
+        if system_msgs:
+            system_text = "\n".join([f"System: {msg}" for msg in system_msgs])
+            full_prompt = f"{system_text}\n\nUser: {prompt}\n\nAssistant:"
+        
+        # Run in executor to avoid blocking
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: self.llm(
+                prompt=full_prompt,
+                max_tokens=self.max_tokens,
+                stop=["</s>", "\n\n", "User:", "Assistant:", "System:"],
+            )
+        )
+        
+        return response["choices"][0]["text"].strip()
 

@@ -6,6 +6,8 @@ By the end of this lesson, you will be able to:
 - Understand the LLM interface
 - Use MockLLM for testing
 - Use OpenAILLM for production
+- Use VLLM for localhost inference
+- Use LocalLLM for llama.cpp inference
 - Integrate LLMs with actions
 
 ## Overview
@@ -23,6 +25,8 @@ All LLMs implement:
 
 - **MockLLM**: For testing without API keys
 - **OpenAILLM**: Connects to OpenAI API
+- **VLLM**: Connects to vLLM server on localhost
+- **LocalLLM**: Uses llama.cpp for local GGUF model inference
 - **Custom LLMs**: You can implement your own
 
 ## Guidance
@@ -45,14 +49,48 @@ llm = OpenAILLM(api_key="your-api-key")
 response = await llm.aask("Hello")
 ```
 
-### 3. Using System Messages
+### 3. Using VLLM (vLLM Server)
+
+```python
+from framework.llm import VLLM
+
+# Connect to vLLM server running on localhost:8000
+llm = VLLM(base_url="http://localhost:8000/v1", model="your-model-name")
+response = await llm.aask("Hello")
+```
+
+**Requirements:**
+- vLLM server running on localhost (default: `http://localhost:8000/v1`)
+- Server must support OpenAI-compatible API
+- Install: `pip install aiohttp` (for async HTTP requests)
+
+### 4. Using LocalLLM (llama.cpp)
+
+```python
+from framework.llm import LocalLLM
+
+# Load a GGUF model file
+llm = LocalLLM(
+    model_path="/path/to/model.gguf",
+    temperature=0.2,
+    max_tokens=512,
+    n_ctx=2048
+)
+response = await llm.aask("Hello")
+```
+
+**Requirements:**
+- GGUF model file
+- Install: `pip install llama-cpp-python`
+
+### 5. Using System Messages
 
 ```python
 system_msg = "You are a helpful assistant"
 response = await llm.aask("Hello", system_msgs=[system_msg])
 ```
 
-### 4. Using LLM in Actions
+### 6. Using LLM in Actions
 
 ```python
 class MyAction(Action):
@@ -108,10 +146,14 @@ After completing this lesson:
 
 - **Async Required**: LLM methods are async, use await
 - **API Keys**: OpenAILLM requires valid API key
+- **vLLM Server**: VLLM requires a running vLLM server on localhost
+- **Model Files**: LocalLLM requires a valid GGUF model file path
 - **System Messages**: Use system messages for role definition
 
 ## Additional Resources
 
 - Check `framework/llm.py` for LLM implementations
 - See OpenAI API documentation for OpenAILLM usage
+- See vLLM documentation for server setup
+- See llama.cpp documentation for LocalLLM usage
 

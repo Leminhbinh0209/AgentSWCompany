@@ -3,7 +3,7 @@ Lesson 06: Understanding LLMs
 ==============================
 
 This lesson introduces the LLM interface and implementations,
-including MockLLM and OpenAILLM.
+including MockLLM, OpenAILLM, VLLM, and LocalLLM.
 
 Run this lesson:
     python lesson_06.py
@@ -14,7 +14,7 @@ import asyncio
 
 # Add parent directory to path to import framework
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_example'))
-from framework.llm import MockLLM, OpenAILLM, BaseLLM
+from framework.llm import MockLLM, OpenAILLM, VLLM, LocalLLM, BaseLLM
 
 
 async def main():
@@ -76,17 +76,67 @@ async def main():
         print(f"OpenAILLM not available: {e}")
     print()
     
-    # 5. LLM interface
-    print("5. LLM Interface")
+    # 5. VLLM (vLLM Server on localhost)
+    print("5. VLLM (Requires vLLM Server Running)")
+    print("-" * 60)
+    try:
+        # Try to connect to vLLM server (will fail if server not running)
+        # In real usage, you would do:
+        # vllm = VLLM(base_url="http://localhost:8000/v1", model="your-model")
+        # response = await vllm.aask("Hello")
+        print("VLLM requires:")
+        print("  1. Install: pip install aiohttp")
+        print("  2. vLLM server running on localhost:8000")
+        print("  3. Usage: VLLM(base_url='http://localhost:8000/v1', model='model-name')")
+        print("  (Skipping actual call - requires running server)")
+        # Try to create instance to check if dependencies are available
+        vllm = VLLM(base_url="http://localhost:8000/v1", model="test-model")
+        print("  ✓ VLLM class is available (but server may not be running)")
+    except ImportError as e:
+        print(f"  VLLM dependencies not available: {e}")
+    except Exception as e:
+        print(f"  VLLM available but server not running (expected): {e}")
+    print()
+    
+    # 6. LocalLLM (llama.cpp)
+    print("6. LocalLLM (Requires GGUF Model File)")
+    print("-" * 60)
+    try:
+        # Try to create LocalLLM (will fail without model file)
+        # In real usage, you would do:
+        # local_llm = LocalLLM(model_path="/path/to/model.gguf")
+        # response = await local_llm.aask("Hello")
+        print("LocalLLM requires:")
+        print("  1. Install: pip install llama-cpp-python")
+        print("  2. GGUF model file")
+        print("  3. Usage: LocalLLM(model_path='/path/to/model.gguf')")
+        print("  (Skipping actual call - requires model file)")
+        # Try to import to check if dependencies are available
+        try:
+            import llama_cpp
+            print("  ✓ llama-cpp-python is installed")
+        except ImportError:
+            print("  ✗ llama-cpp-python not installed")
+    except Exception as e:
+        print(f"  LocalLLM not available: {e}")
+    print()
+    
+    # 7. LLM interface
+    print("7. LLM Interface")
     print("-" * 60)
     print("BaseLLM provides:")
     print("  - aask(prompt, system_msgs): Async ask method")
     print("  - All LLMs implement this interface")
     print("  - Easy to swap implementations")
+    print("  - Four implementations available:")
+    print("    1. MockLLM - for testing")
+    print("    2. OpenAILLM - for OpenAI API")
+    print("    3. VLLM - for vLLM server")
+    print("    4. LocalLLM - for llama.cpp")
     print()
     
-    # 6. Using LLM in actions
-    print("6. Using LLM in Actions")
+    # 8. Using LLM in actions
+    print("8. Using LLM in Actions")
     print("-" * 60)
     from framework.action import Action
     from framework.schema import ActionOutput
@@ -111,7 +161,10 @@ async def main():
     print("- LLMs provide AI capabilities to actions")
     print("- MockLLM is for testing without API keys")
     print("- OpenAILLM connects to OpenAI API")
+    print("- VLLM connects to vLLM server on localhost")
+    print("- LocalLLM uses llama.cpp for local GGUF models")
     print("- All LLMs implement the same interface")
+    print("- Easy to swap between different LLM implementations")
 
 
 if __name__ == "__main__":

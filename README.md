@@ -153,6 +153,8 @@ Phase 7: Specialization (Lessons 22-24)
 - LLM interface and implementations
 - MockLLM for testing
 - OpenAILLM for production
+- VLLM for localhost inference
+- LocalLLM for llama.cpp inference
 - Integrating LLMs with actions
 
 **After This Lesson:**

@@ -39,14 +39,14 @@ async def main():
     links = await browser.extract_links()
     print(f"Found {len(links)} links")
     for link in links[:5]:
-        print(f"  {link.get('text', '')[:50]}: {link.get('url', '')[:50]}")
+        print(f"  {link.get('text', '')[:]}: {link.get('url', '')[:]}")
     print()
     
     # 3. Extract text
     print("3. Extracting Text")
     print("-" * 60)
     text = await browser.extract_text()
-    print(f"Text preview: {text[:200]}...")
+    print(f"Text preview: {text[:]}...")
     print()
     
     print("=" * 60)

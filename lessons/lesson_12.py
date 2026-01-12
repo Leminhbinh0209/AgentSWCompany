@@ -19,15 +19,16 @@ from framework.tools.search_engine import SearchEngine
 async def main():
     print("=" * 60)
     print("Lesson 12: Search Engine Tool")
+    print("Install duckduckgo_search for best results: pip install ddgs")
     print("=" * 60)
     print()
     
-    search_engine = SearchEngine()
+    search_engine = SearchEngine(preferred_provider="ddg")  # Use DuckDuckGo library
     
     # 1. Search the web
     print("1. Searching the Web")
     print("-" * 60)
-    query = "Python programming"
+    query = "Current US President's name"
     results = await search_engine.search(query, num_results=5)
     print(f"Query: {query}")
     print(f"Found {len(results)} results")
@@ -40,7 +41,7 @@ async def main():
     # 2. Search and summarize
     print("2. Search and Summarize")
     print("-" * 60)
-    summary = await search_engine.search_and_summarize("multi-agent systems", max_results=3)
+    summary = await search_engine.search_and_summarize("CEO of Google", max_results=3)
     print(f"Summary: {summary[:300]}...")
     print()
     

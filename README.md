@@ -782,15 +782,16 @@ CMAKE_ARGS="-DLLAMA_BLAS=ON -DLLAMA_BLAS_VENDOR=OpenBLAS" pip install llama-cpp-
 1. **Llama 3 8B Instruct (Recommended):**
    ```bash
    # Download from Hugging Face
-   # Visit: https://huggingface.co/meta-llama/Meta-Llama-3-8B-Instruct-GGUF
+   # Visit: https://huggingface.co/QuantFactory
    # Or use huggingface-cli:
-   huggingface-cli download meta-llama/Meta-Llama-3-8B-Instruct-GGUF Meta-Llama-3-8B-Instruct.Q3_K_M.gguf --local-dir ./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF
+   mkdir HF_MODELS
+   export HUGGINGFACE_HUB_CACHE="HF_MODELS"
+   export HF_HOME="HF_MODELS"
+   hf download QuantFactory/Meta-Llama-3-8B-Instruct-GGUF --local-dir ./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF
    ```
 
 2. **Other Supported Models:**
-   - Llama 2: `meta-llama/Llama-2-7b-chat-hf`
-   - Qwen 2.5: `Qwen/Qwen2.5-7B-Instruct-GGUF`
-   - IBM Granite: `ibm-granite/granite-3b-instruct-v2`
+   - Visit this respository: https://huggingface.co/QuantFactory
 
 **Usage:**
 

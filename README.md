@@ -4,6 +4,24 @@
 
 This course consists of **24 lessons** organized into **7 phases**, taking you from basic concepts to building a complete multi-agent software company framework.
 
+### 💻 Hardware Requirements
+
+**Important:** This course uses LLMs (Large Language Models) for agent intelligence. You have two options:
+
+- **CPU Option**: Works on any modern computer (recommended for learning)
+  - Uses **LocalLLM (llama.cpp)** with quantized models
+  - No GPU required
+  - ~8GB RAM recommended
+  - ~5-10GB disk space for model files
+
+- **GPU Option**: For faster inference and production use
+  - Uses **VLLM** or **LocalLLM with GPU support**
+  - Requires NVIDIA GPU with CUDA support
+  - 8GB+ VRAM recommended
+  - Faster inference, better for batch processing
+
+📖 **For detailed setup instructions, see the [LLM Setup and Configuration](#🤖-llm-setup-and-configuration) section below.**
+
 ---
 
 ## 🎯 Learning Journey

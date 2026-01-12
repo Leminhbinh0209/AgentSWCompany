@@ -13,7 +13,7 @@ import asyncio
 
 # Add parent directory to path to import framework
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'tutorial_example'))
-from framework.actions.advanced.action_graph import ActionGraph, ActionNode
+from framework.actions.advanced.action_graph import ActionGraph
 from framework.action import Action
 from framework.schema import Message, ActionOutput
 from framework.llm import get_llm
@@ -43,12 +43,9 @@ async def main():
     action1 = SimpleAction("Action1", "Result 1", llm=get_llm())
     action2 = SimpleAction("Action2", "Result 2", llm=get_llm())
     
-    node1 = ActionNode(action1, node_id="node1")
-    node2 = ActionNode(action2, node_id="node2")
-    
-    graph.add_node(node1)
-    graph.add_node(node2)
-    graph.add_edge("node1", "node2")
+    # Add actions to graph (node2 depends on node1)
+    node1_id = graph.add_action(action1, node_id="node1")
+    node2_id = graph.add_action(action2, node_id="node2", dependencies=["node1"])
     
     print(f"Graph created with {len(graph.nodes)} nodes")
     print()
@@ -57,7 +54,9 @@ async def main():
     print("2. Executing Action Graph")
     print("-" * 60)
     results = await graph.execute()
-    print(f"Executed {len(results)} actions")
+    print(f"Status: {results['status']}")
+    print(f"Completed: {len(results['completed'])} actions")
+    print(f"Results: {results['results']}")
     print()
     
     print("=" * 60)

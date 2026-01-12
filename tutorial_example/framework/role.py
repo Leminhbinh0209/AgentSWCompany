@@ -42,8 +42,13 @@ class Role:
     
     def set_context(self, context: dict):
         """Set shared context for role and actions"""
+        self._context = context
         for action in self.actions:
             action.set_context(context)
+    
+    def set_environment(self, environment):
+        """Set environment reference (for TeamLeader coordination)"""
+        self._environment = environment
     
     def add_action(self, action: Action):
         """Add an action to this role"""

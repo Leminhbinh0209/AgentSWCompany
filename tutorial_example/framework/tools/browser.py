@@ -57,6 +57,40 @@ class Browser:
                 "content": ""
             }
     
+    async def extract_links(self) -> List[Dict[str, str]]:
+        """
+        Extract all links from current page
+        
+        Returns:
+            List of dictionaries with 'text' and 'url' keys
+        """
+        if not self.page_content:
+            return []
+        
+        links = []
+        # Pattern to match <a> tags with href attributes
+        pattern = r'<a[^>]*href=["\']([^"\']*)["\'][^>]*>(.*?)</a>'
+        matches = re.findall(pattern, self.page_content, re.IGNORECASE | re.DOTALL)
+        
+        for url, text_html in matches:
+            # Extract text from link
+            text = self._strip_html(text_html).strip()
+            if not text:
+                text = url  # Use URL as text if no text found
+            
+            # Convert relative URLs to absolute
+            if self.current_url:
+                absolute_url = urljoin(self.current_url, url)
+            else:
+                absolute_url = url
+            
+            links.append({
+                "text": text[:200],  # Limit text length
+                "url": absolute_url
+            })
+        
+        return links
+    
     async def extract_text(self, selector: Optional[str] = None) -> str:
         """
         Extract text from current page

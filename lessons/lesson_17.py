@@ -33,8 +33,8 @@ async def main():
     goal = "Create a calculator application"
     plan = await planner.create_plan(goal)
     print(f"Plan created with {len(plan.tasks)} tasks")
-    for i, task in enumerate(plan.tasks[:3], 1):
-        print(f"  {i}. {task.description[:50]}...")
+    for i, task in enumerate(plan.tasks.values(), 1):
+        print(f"  {i}. {task.description}")
     print()
     
     print("=" * 60)

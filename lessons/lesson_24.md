@@ -48,7 +48,15 @@ Setup CI/CD pipelines
 
 ## Next Steps
 
-- Review all lessons to master the framework
+- **Move to Lesson 28** to learn about the Context System
+- **Continue with Lessons 29-34** to learn all new features:
+  - Lesson 28: Context System
+  - Lesson 29: Cost Management
+  - Lesson 30: TeamLeader Role
+  - Lesson 31: Environment.run() and Automatic Workflow
+  - Lesson 32: Serialization and State Management
+  - Lesson 33: Configuration System
+  - Lesson 34: generate_repo() - Complete Software Company
 - Try combining all roles in a complete workflow
 - Experiment with different project types
 

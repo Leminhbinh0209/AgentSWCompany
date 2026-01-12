@@ -25,35 +25,35 @@ async def main():
     print("=" * 60)
     print()
     
-    workspace = tempfile.mkdtemp(prefix="test_lesson_")
+    workspace = "myproject_lesson_16"
+    os.makedirs(workspace, exist_ok=True)
     print(f"Workspace: {workspace}")
-    print()
     
-    try:
-        code = """def add(a, b):
+    
+    code = """def add(a, b):
     return a + b
 
 def multiply(a, b):
     return a * b
 """
         
-        generator = TestGenerator(workspace_path=workspace, llm=get_llm())
+    generator = TestGenerator(workspace_path=workspace, llm=get_llm())
+    
+    # Generate tests
+    print("1. Generating Tests")
+    print("-" * 60)
+    test_code = await generator.generate_tests(code, test_type="unit", module_name="calculator")
+    print(f"Generated test code ({len(test_code)} chars)")
+    print(test_code)
+    print()
+    
+    print("=" * 60)
+    print("Lesson 16 Complete!")
+    print("=" * 60)
         
-        # Generate tests
-        print("1. Generating Tests")
-        print("-" * 60)
-        test_code = await generator.generate_tests(code, test_type="unit", module_name="calculator")
-        print(f"Generated test code ({len(test_code)} chars)")
-        print(test_code[:200] + "...")
-        print()
-        
-        print("=" * 60)
-        print("Lesson 16 Complete!")
-        print("=" * 60)
-        
-    finally:
-        shutil.rmtree(workspace)
-        print(f"\nCleaned up workspace: {workspace}")
+    print(f"Please manually clear the workspace folder when done:")
+    print(f"  {workspace}")
+    print()
 
 
 if __name__ == "__main__":

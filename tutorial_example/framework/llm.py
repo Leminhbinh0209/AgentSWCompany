@@ -196,7 +196,7 @@ class VLLM(BaseLLM):
         base_url: str = "http://localhost:8000/v1",
         model: str = None,
         temperature: float = 0.2,
-        max_tokens: int = 512,
+        max_tokens: int = 8096,
         api_key: str = None
     ):
         """
@@ -287,7 +287,7 @@ class LocalLLM(BaseLLM):
         self,
         model_path: str="./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
         temperature: float = 0.2,
-        max_tokens: int = 512,
+        max_tokens: int = 8096,
         n_ctx: int = 8192
     ):
         """

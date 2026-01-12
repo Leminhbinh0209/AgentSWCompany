@@ -39,7 +39,7 @@ async def main():
         Engineer(llm=llm),
     ])
     
-    idea = "Create a simple calculator"
+    idea = "Create a simple todo list application"
     print(f"Idea: {idea}")
     print()
     

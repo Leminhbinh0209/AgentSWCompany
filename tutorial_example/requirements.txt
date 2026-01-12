@@ -1,0 +1,9 @@
+# Optional: For real LLM usage
+# openai>=1.0.0
+
+# HTTP client for Browser and Search Engine tools (Phase 1)
+httpx>=0.24.0
+
+# No other dependencies required for basic example
+# The framework uses only Python standard library + asyncio
+

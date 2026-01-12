@@ -49,6 +49,9 @@ Phase 7: Specialization (Lessons 22-24)
 
 ---
 
+<details>
+<summary><b>📖 Phase 1: Basic Framework (Lessons 1-8)</b></summary>
+
 ## 📖 Phase 1: Basic Framework (Lessons 1-8)
 
 ### Foundation Stage: Understanding the Building Blocks
@@ -190,7 +193,12 @@ Phase 7: Specialization (Lessons 22-24)
 
 **🎉 Milestone: You've built a basic multi-agent system!**
 
+</details>
+
 ---
+
+<details>
+<summary><b>🛠️ Phase 2: Core Tools (Lessons 9-12)</b></summary>
 
 ## 🛠️ Phase 2: Core Tools (Lessons 9-12)
 
@@ -270,7 +278,12 @@ Phase 7: Specialization (Lessons 22-24)
 
 **🎉 Milestone: Your agents now have real-world capabilities!**
 
+</details>
+
 ---
+
+<details>
+<summary><b>📁 Phase 3: Project Management (Lessons 13-14)</b></summary>
 
 ## 📁 Phase 3: Project Management (Lessons 13-14)
 
@@ -321,7 +334,12 @@ Phase 7: Specialization (Lessons 22-24)
 
 **🎉 Milestone: Your agents can create organized projects!**
 
+</details>
+
 ---
+
+<details>
+<summary><b>✅ Phase 4: Quality Assurance (Lessons 15-16)</b></summary>
 
 ## ✅ Phase 4: Quality Assurance (Lessons 15-16)
 
@@ -373,7 +391,12 @@ Phase 7: Specialization (Lessons 22-24)
 
 **🎉 Milestone: Your agents ensure code quality!**
 
+</details>
+
 ---
+
+<details>
+<summary><b>📋 Phase 5: Planning (Lessons 17-18)</b></summary>
 
 ## 📋 Phase 5: Planning (Lessons 17-18)
 
@@ -424,7 +447,12 @@ Phase 7: Specialization (Lessons 22-24)
 
 **🎉 Milestone: Your agents can plan and manage projects!**
 
+</details>
+
 ---
+
+<details>
+<summary><b>🧠 Phase 6: Memory & Advanced Actions (Lessons 19-21)</b></summary>
 
 ## 🧠 Phase 6: Memory & Advanced Actions (Lessons 19-21)
 
@@ -490,7 +518,12 @@ Phase 7: Specialization (Lessons 22-24)
 
 **🎉 Milestone: You have a complete multi-agent system!**
 
+</details>
+
 ---
+
+<details>
+<summary><b>👥 Phase 7: Specialized Roles (Lessons 22-24)</b></summary>
 
 ## 👥 Phase 7: Specialized Roles (Lessons 22-24)
 
@@ -556,7 +589,12 @@ Phase 7: Specialization (Lessons 22-24)
 
 **🎉 Final Milestone: You have a complete specialized software company!**
 
+</details>
+
 ---
+
+<details>
+<summary><b>📚 Lesson Components</b></summary>
 
 ## 📚 Lesson Components
 
@@ -579,7 +617,12 @@ Each lesson includes:
 - ✅ **Common Pitfalls**: What to avoid
 - ✅ **Additional Resources**: Where to learn more
 
+</details>
+
 ---
+
+<details>
+<summary><b>🗺️ Complete Learning Path</b></summary>
 
 ## 🗺️ Complete Learning Path
 
@@ -611,7 +654,12 @@ START
     COMPLETE FRAMEWORK
 ```
 
+</details>
+
 ---
+
+<details>
+<summary><b>🎓 Expected Learning Outcomes</b></summary>
 
 ## 🎓 Expected Learning Outcomes
 
@@ -654,7 +702,12 @@ START
 - ✅ Automate deployment
 - ✅ **Build a complete specialized software company**
 
+</details>
+
 ---
+
+<details>
+<summary><b>🚀 Getting Started</b></summary>
 
 ## 🚀 Getting Started
 
@@ -664,7 +717,12 @@ START
 4. **Experiment**: Try modifying examples
 5. **Build projects**: Apply what you learn
 
+</details>
+
 ---
+
+<details>
+<summary><b>🤖 LLM Setup and Configuration</b></summary>
 
 ## 🤖 LLM Setup and Configuration
 
@@ -847,7 +905,12 @@ curl http://localhost:8000/v1/models
 - Verify model format compatibility
 - Ensure sufficient disk space for model files
 
+</details>
+
 ---
+
+<details>
+<summary><b>📊 Progress Tracking</b></summary>
 
 ## 📊 Progress Tracking
 
@@ -861,7 +924,12 @@ Track your progress through the course:
 - [ ] Phase 6: Memory & Advanced Actions (Lessons 19-21)
 - [ ] Phase 7: Specialized Roles (Lessons 22-24)
 
+</details>
+
 ---
+
+<details>
+<summary><b>🎯 Final Goal</b></summary>
 
 ## 🎯 Final Goal
 
@@ -878,7 +946,12 @@ By completing all 24 lessons, you will have:
 
 **You'll have a production-ready multi-agent software company framework!** 🎉
 
+</details>
+
 ---
+
+<details>
+<summary><b>📝 Notes</b></summary>
 
 ## 📝 Notes
 

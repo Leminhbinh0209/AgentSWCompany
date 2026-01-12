@@ -272,24 +272,23 @@ class VLLM(BaseLLM):
                     return result["choices"][0]["message"]["content"]
         except aiohttp.ClientError as e:
             raise RuntimeError(
-                f"Failed to connect to vLLM server at {self.base_url}. "
+                f"Failed to connect to vLLM server at {self.base_url}. " +
                 f"Make sure the server is running. Error: {e}"
             )
-
 
 class LocalLLM(BaseLLM):
     """
     A minimal wrapper for local LLM inference using llama.cpp.
     
-    This class is intentionally simple and grows throughout the lessons.
+    Supports: Llama 2, Llama 3, Qwen 2/2.5, IBM Granite 3.0
     """
     
     def __init__(
         self,
-        model_path: str,
+        model_path: str="./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
         temperature: float = 0.2,
         max_tokens: int = 512,
-        n_ctx: int = 2048
+        n_ctx: int = 8192
     ):
         """
         Initialize the local LLM.
@@ -304,7 +303,7 @@ class LocalLLM(BaseLLM):
             from llama_cpp import Llama
         except ImportError:
             raise ImportError(
-                "llama-cpp-python package is required. Install with: "
+                "llama-cpp-python package is required. Install with: " +
                 "pip install llama-cpp-python"
             )
         
@@ -315,34 +314,214 @@ class LocalLLM(BaseLLM):
             verbose=False,
         )
         self.max_tokens = max_tokens
-    
+        
+        # Detect model type and set appropriate template
+        model_path_lower = model_path.lower()
+        if "llama-2" in model_path_lower or "llama2" in model_path_lower:
+            self.prompt_template = self._llama2_prompt
+            self.stop_tokens = ["</s>"]
+        elif "llama-3" in model_path_lower or "llama3" in model_path_lower:
+            self.prompt_template = self._llama3_prompt
+            self.stop_tokens = ["<|eot_id|>", "<|end_of_text|>"]
+        elif "qwen2.5" in model_path_lower or "qwen-2.5" in model_path_lower:
+            self.prompt_template = self._qwen2_prompt
+            self.stop_tokens = ["<|im_end|>", "<|endoftext|>"]
+        elif "qwen2" in model_path_lower or "qwen-2" in model_path_lower:
+            self.prompt_template = self._qwen2_prompt
+            self.stop_tokens = ["<|im_end|>", "<|endoftext|>"]
+        elif "granite" in model_path_lower:
+            self.prompt_template = self._granite_prompt
+            self.stop_tokens = ["<|end_of_text|>", "<|endoftext|>"]
+        else:
+            raise ValueError(f"Unsupported model: {model_path}. Supported: Llama 2/3, Qwen 2/2.5, Granite 3.0")
+
+    def _llama2_prompt(self, prompt: str, system_msgs: Optional[List[str]] = None) -> str:
+        """
+        Llama 2 prompt format:
+        <s>[INST] <<SYS>>
+        {system_message}
+        <</SYS>>
+        
+        {user_message} [/INST]
+        """
+        full_prompt = "<s>[INST] "
+        
+        # Add system message if provided
+        if system_msgs:
+            system_text = "\n".join(system_msgs)
+            full_prompt += f"<<SYS>>\n{system_text}\n<</SYS>>\n\n"
+        
+        # Add user prompt
+        full_prompt += f"{prompt} [/INST]"
+        
+        return full_prompt
+
+    def _llama3_prompt(self, prompt: str, system_msgs: Optional[List[str]] = None) -> str:
+        """
+        Llama 3 prompt format:
+        <|begin_of_text|><|start_header_id|>system<|end_header_id|>
+        
+        {system_message}<|eot_id|><|start_header_id|>user<|end_header_id|>
+        
+        {user_message}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
+        """
+        full_prompt = "<|begin_of_text|>"
+        
+        # Add system message if provided
+        if system_msgs:
+            system_text = "\n".join(system_msgs)
+            full_prompt += f"<|start_header_id|>system<|end_header_id|>\n\n{system_text}<|eot_id|>"
+        
+        # Add user prompt
+        full_prompt += f"<|start_header_id|>user<|end_header_id|>\n\n{prompt}<|eot_id|>"
+        
+        # Add assistant header
+        full_prompt += "<|start_header_id|>assistant<|end_header_id|>\n\n"
+        
+        return full_prompt
+
+    def _qwen2_prompt(self, prompt: str, system_msgs: Optional[List[str]] = None) -> str:
+        """
+        Qwen 2/2.5 prompt format (ChatML):
+        <|im_start|>system
+        {system_message}<|im_end|>
+        <|im_start|>user
+        {user_message}<|im_end|>
+        <|im_start|>assistant
+        """
+        full_prompt = ""
+        
+        # Add system message if provided
+        if system_msgs:
+            system_text = "\n".join(system_msgs)
+            full_prompt += f"<|im_start|>system\n{system_text}<|im_end|>\n"
+        
+        # Add user prompt
+        full_prompt += f"<|im_start|>user\n{prompt}<|im_end|>\n"
+        
+        # Add assistant header
+        full_prompt += "<|im_start|>assistant\n"
+        
+        return full_prompt
+
+    def _granite_prompt(self, prompt: str, system_msgs: Optional[List[str]] = None) -> str:
+        """
+        IBM Granite 3.0 prompt format:
+        <|start_of_role|>system<|end_of_role|>{system_message}<|end_of_text|>
+        <|start_of_role|>user<|end_of_role|>{user_message}<|end_of_text|>
+        <|start_of_role|>assistant<|end_of_role|>
+        """
+        full_prompt = ""
+        
+        # Add system message if provided
+        if system_msgs:
+            system_text = "\n".join(system_msgs)
+            full_prompt += f"<|start_of_role|>system<|end_of_role|>{system_text}<|end_of_text|>\n"
+        
+        # Add user prompt
+        full_prompt += f"<|start_of_role|>user<|end_of_role|>{prompt}<|end_of_text|>\n"
+        
+        # Add assistant header
+        full_prompt += "<|start_of_role|>assistant<|end_of_role|>"
+        
+        return full_prompt
+
     async def aask(self, prompt: str, system_msgs: Optional[List[str]] = None) -> str:
         """
         Generate text from a prompt.
         
         Args:
             prompt: The input text prompt
-            system_msgs: Optional list of system messages (will be prepended to prompt)
+            system_msgs: Optional list of system messages
             
         Returns:
             Generated text as a string
         """
-        # Combine system messages and user prompt
-        full_prompt = prompt
-        if system_msgs:
-            system_text = "\n".join([f"System: {msg}" for msg in system_msgs])
-            full_prompt = f"{system_text}\n\nUser: {prompt}\n\nAssistant:"
+        # Format prompt using detected template
+        # full_prompt = self.prompt_template(prompt, system_msgs) # OLD
+        messages = []
         
+        # Add system messages if provided
+        if system_msgs:
+            system_text = "\n".join(system_msgs)
+            messages.append({
+                "role": "system",
+                "content": system_text
+            })
+        
+        # Add user prompt
+        messages.append({
+            "role": "user",
+            "content": prompt
+        })
         # Run in executor to avoid blocking
         loop = asyncio.get_event_loop()
+        # response = await loop.run_in_executor(
+        #     None,
+        #     lambda: self.llm(
+        #         prompt=full_prompt,
+        #         max_tokens=self.max_tokens,
+        #         stop=self.stop_tokens,
+        #     )
+        # )# OLD
         response = await loop.run_in_executor(
             None,
-            lambda: self.llm(
-                prompt=full_prompt,
+            lambda: self.llm.create_chat_completion(
+                messages=messages,
                 max_tokens=self.max_tokens,
-                stop=["</s>", "\n\n", "User:", "Assistant:", "System:"],
+                stop=self.stop_tokens,
             )
         )
+        # Extract text and clean up
+        # res = response["choices"][0]["text"].strip() # OLD
+        res = response["choices"][0]["message"]["content"].strip() # NEW
         
-        return response["choices"][0]["text"].strip()
+        return res
+
+def get_llm(
+    local_model_path: str = "./HF_MODELS/Meta-Llama-3-8B-Instruct-GGUF/Meta-Llama-3-8B-Instruct.Q3_K_M.gguf",
+    vllm_base_url: str = "http://localhost:8000/v1",
+    vllm_model: str = None
+) -> BaseLLM:
+    """
+    Get the best available LLM with priority:
+    1. LocalLLM (llama.cpp) - if model file exists
+    2. VLLM - if server is running
+    3. MockLLM - fallback for testing
+    
+    Args:
+        local_model_path: Path to GGUF model file for LocalLLM
+        vllm_base_url: Base URL for vLLM server
+        vllm_model: Model name for vLLM (optional)
+        
+    Returns:
+        BaseLLM instance (LocalLLM, VLLM, or MockLLM)
+    """
+    import os
+    
+    # Priority 1: Try LocalLLM
+    if os.path.exists(local_model_path):
+        try:
+            print(f"Initializing LocalLLM with model path:\n {local_model_path}")
+            
+            return LocalLLM(model_path=local_model_path)
+        except Exception as e:
+            print(f"Warning: Could not initialize LocalLLM: {e}")
+            print("Falling back to VLLM...")
+    
+    # Priority 2: Try VLLM
+    try:
+        import aiohttp
+        # Try to create VLLM instance (will fail if server not running)
+        vllm = VLLM(base_url=vllm_base_url, model=vllm_model)
+        # Test connection with a simple request (in a non-blocking way)
+        # We'll just return it and let it fail at first use if server is down
+        return vllm
+    except Exception as e:
+        print(f"Warning: Could not initialize VLLM: {e}")
+        print("Falling back to MockLLM...")
+    
+    # Priority 3: Fallback to MockLLM
+    print("Using MockLLM (no local model or vLLM server available)")
+    return MockLLM()
 
